@@ -1,2 +1,2 @@
-# prueba_meteologica
+# Acceso_y_extracción_de_datos_de_CSV
 Prueba técnica
