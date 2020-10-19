@@ -9,108 +9,68 @@ typedef struct{
 	double max_Temp;
 	double min_Temp;
 	double precipitation;
-	int cloudiness;
+	//int cloudiness;
 }city_Attributes;
 
 
-typedef struct{
-	city_Attributes *Madrid;
-	city_Attributes *Sevilla;
-	city_Attributes *Gijon;
-	city_Attributes *Valencia;
-}cities;
+city_Attributes *city;   // We declare an array of type city_Attributes where each element belongs to the days after the date entered for the desired city.
 
-cities city;
 
-void count_days(int num_of_cities, int *number_days, int *number_rows);
-void reserv(int num_of_days, city_Attributes *Madrid);
-void reserv2(int num_of_days, city_Attributes *Sevilla);
-void reserv3(int num_of_days, city_Attributes *Gijon);
-void reserv4(int num_of_days, city_Attributes *Valencia);
+int count_rows();
+int find_and_store(int num_rows, char date[], char name_city[]);
 void change(char data[]);
 void change2(char data[]);
+void remove_space(char data[]);
+void change_Gijon(char data []);
 void empty(char temp[]);
-void copy(char temp[], int i, int j);
+void copy(char temp[], int l, int j);
 char* flip_date(char date[]);
-void srch_str_data(char name_of_city[], char date[], int number_of_days);
-void store_in_JSON(int position_of_day, int number_of_days ,char name_of_city[]);
+double Cel_to_Fahren(double *temperature);
+void store_in_JSON(int num_days ,char name_of_city[]);
+
 
 int main(){
 	
-	int num_columns = 6; 
-	int num_rows;  // We initialize with the number of columns in the file.
-	int num_cities = 4;   // We initialize the variable with the number of cities in the file.
-	int num_days;   // This variable is used to count the days of each city.
-	int i, j, k;
-	char temp[200];   // We use a variable temporarily to store the data character by character.
-	char aux;
-	char name_city[20];
-	char date[11];
-	//city_Attributes Madrid;
+	int num_rows; 
+	int num_days ;   // This variable is used to count the days of each city.
+	char ext[4];   // This variable is used to make the decision whether or not to exit the program.
+	char date[11];   // This variable is used to store the date that the user enters.
+	char name_city[30];   // This variable is used to store the city that the user enters.
 	
 	
-	count_days(num_cities, &num_days, &num_rows);
-	reserv(num_days, city.Madrid);
-	reserv2(num_days, city.Sevilla);
-	reserv3(num_days, city.Gijon);
-	reserv4(num_days, city.Valencia);
 	
-	// The file that has CSV format opens:
-	FILE *f;
-	f = fopen("Meteologica_vacante_ProgramadorC_20200901_datos.CSV","r");
-	fgets(temp, 200, f);   // We discard the first row that contains the description of the data with the empty function.
+	num_rows = count_rows();   // This function would work for a document with few rows because the malloc function overflows for this one.
+
 	
-	// This loop goes through Excel, saving the values of the variables within each city: 
-	for(i=0; i < (num_days*num_cities); i++){
-		empty(temp);   // We discard the content of temp that contains the firts row.
-		
-		// The following loop makes it possible to move through the columns of the file:
-		for(j = 0; j < num_columns; j++){
-			aux = '\0';
-			
-			// With the following loop we can save the data of each column character by character in the variable 'temp':
-			for(k = 0; (aux !=';') && (aux != '\n'); k++){
-				aux = fgetc(f);
-				if ((aux != ';')&&(aux != '\n')){
-					temp[k] = aux;
-					copy(temp, i, j);   // Copy the data into the appropiate variable of 'city_Attributes'.
-				}
-			}
-			empty(temp);   // We clean the variable temp so as not to overwrite the data in the next iteration.
-		}
-		
-		
-		/*// Take on screen:
-		if((i/31)==0){
-			printf("Date: %s   City: %s   Max_Temp= %f   Min_Temp= %f   Precipitation= %f   Cloudiness= %i \n", city.Madrid[i%31].date, city.Madrid[i].name,  city.Madrid[i].max_Temp, city.Madrid[i].min_Temp, city.Madrid[i].precipitation, city.Madrid[i%31].cloudiness);
-		}else if((i/31)==1){
-			printf("Date: %s   City: %s   Max_Temp= %f   Min_Temp= %f   Precipitation= %f   Cloudiness= %i \n", city.Sevilla[i%31].date, city.Sevilla[i%31].name,  city.Sevilla[i%31].max_Temp, city.Sevilla[i%31].min_Temp, city.Sevilla[i%31].precipitation, city.Sevilla[i%31].cloudiness);
-		}else if((i/31)==2){
-			printf("Date: %s   City: %s   Max_Temp= %f   Min_Temp= %f   Precipitation= %f   Cloudiness= %i \n", city.Gijon[i%31].date, city.Gijon[i%31].name,  city.Gijon[i%31].max_Temp, city.Gijon[i%31].min_Temp, city.Gijon[i%31].precipitation, city.Gijon[i%31].cloudiness);
-		}else if((i/31)==3){
-			printf("Date: %s   City: %s   Max_Temp= %f   Min_Temp= %f   Precipitation= %f   Cloudiness= %i \n", city.Valencia[i%31].date, city.Valencia[i%31].name,  city.Valencia[i%31].max_Temp, city.Valencia[i%31].min_Temp, city.Valencia[i%31].precipitation, city.Valencia[i%31].cloudiness);
-		}*/	
-	}
-	
-	// The file that has CSV format closes
-	fclose(f);
 	
 	
 	do{
-		printf("Enter the name of the city you would like to consult (Madrid, Sevilla, Gijon, Valencia):\n");
+		change2(ext);
+		printf("Enter the name of the city you would like to consult:\n");
 		fflush(stdin); // Remove the intro-letter from the buffer.
-		scanf("%s", &name_city);
-		if(strcmpi(name_city, "Madrid") && strcmpi(name_city, "Sevilla") && strcmpi(name_city, "Gijon") && strcmpi(name_city, "Valencia")){
-			printf("\nEnter a name that is on the list. ");
-		}
-	}while (strcmpi(name_city, "Madrid") && strcmpi(name_city, "Sevilla") && strcmpi(name_city, "Gijon") && strcmpi(name_city, "Valencia"));
+		fgets(name_city,20,stdin);
+		change2(name_city);
+		printf("\n\nEnter the date you would like to consult (ej:dd/mm/yyyy):\n");
+		fflush(stdin); // Remove the intro-letter from the buffer.
+		fgets(date,11,stdin);
+		change2(date);
+		printf("\n\n\n");
+		fflush(stdin);
+		num_days = find_and_store(num_rows, date, name_city);
+		store_in_JSON( num_days ,name_city);
+		
+		printf("Do you want to continue obtaining data ('Yes' or 'No')?");
+		do{
+			fflush(stdin);
+			scanf("%s", &ext);
+			if((strcmpi(ext, "Yes")) && (strcmpi(ext, "No"))){
+				printf("you must enter one of two options: 'Yes' or 'No'.\n");
+			}
+		}while((strcmpi(ext, "Yes")) && (strcmpi(ext, "No")));
+		
+	}while(!strcmpi(ext,"Yes"));
 	
-	printf("\nEnter the date you would like to consult (ej:dd/mm/yyyy):\n");
-	fflush(stdin); // Remove the intro-letter from the buffer.
-	scanf("%s", &date);
-	
-	srch_str_data(name_city, date, num_days);
-	
+	free(city);   // We free the reserved memory.
 	
 	system("pause");
 	return 0;
@@ -119,13 +79,168 @@ int main(){
 
 
 
+// This function searches the CSV for the indicated date and city, saving in variables and showing the results.
+int find_and_store(int num_rows, char date[], char name_city[]){
+
+	int i, j, k;
+	int l;
+	int count = 0;
+	int exits_city = 0;   // Serves to indicate if the entered city exists.
+	int exits_day = 0;   // Serves to indicate if the entered date exists.
+	char aux='\0';   // It is the variable where the selected character of the CSV is stored in each iteration.
+	char date_temp[10];   // It is the variable where the dates are stored while searching for the corresponding row.
+	char name_city_temp[50];   // It is the variable where the names of cities are stored while searching for the corresponding row.
+	char temp[200];   // We use a variable temporarily to store the data character by character.
+	char first_day[11];   // Used to store and then display the first day.
+	char last_day[11];   // // Used to store and then display the last day.
+	
+	FILE *f;
+	
+	
+	// This loop requires that you enter a date and city that are in the document.
+	while((exits_city == 0) || (exits_day == 0)){
+		l = 0;
+		exits_city = 0;
+		exits_day = 0;  
+		aux='\0';
+		count = 0;
+
+		
+		f = fopen("Meteologica_vacante_ProgramadorC_20200901_datos.CSV","r");
+		if(f == NULL){
+			printf("The file could not be opened.\n");
+			exit(1);
+		}
+		
+		fgets(temp, 200, f);   // We discard the first row that contains the description of the data with the empty function.
+		
+		// This loop goes through Excel, saving the values of the searched variables: 
+		for(i=0; i < num_rows; i++){
+			
+			empty(temp);   // We discard the content of temp that contains the firts row.
+			aux = '\0';   // Needed when aux is '\n'.
+			for(j = 0; aux != '\n'; j++){
+				
+				aux = '\0';   // Needed when aux is ';'.
+				for(k = 0; (aux !=';') && (aux != '\n'); k++){
+					
+					aux = fgetc(f);   // Extract data from file character by character
+					if ((aux != ';')&&(aux != '\n')){
+						temp[k] = aux;   // As long as we don't have a';' or a '\n' we fill temp character by character.
+					}
+				}
+				// Act on the first column (dates). We temporarily copy the date and save the first dy and the last day.
+				if(j == 0){
+					remove_space(temp);
+					if(temp[4] == '/'){
+					strncpy(date_temp,flip_date(temp),10);
+					}else{
+						strcpy(date_temp,temp);
+					}
+					if(i == 0){
+						strcpy(first_day,temp);   // Save the first day.
+					}else if(i == (num_rows-1)){
+						strcpy(last_day, temp);   // save the last day
+					}
+					if(!strcmpi(date_temp, date)){
+						exits_day = 1;   // Informs that the date entered is correct
+					}
+					empty(temp);   // Once the temp value is saved, we need to initialize the variable so there is no bad data.
+				
+				// Act on the second column (dates). We temporarily copy the city and change the letters of Gijon.
+				}else if(j == 1){  
+					remove_space(temp);
+					// We do it inside this else if and not the change_Gijon function, so as not to have to call the function constantly:
+					if((temp[0]=='G'||temp[0]=='g')&&(temp[1]=='I'||temp[1]=='i')&&(temp[2]=='J'||temp[2]=='j')){ 
+						change_Gijon(temp);
+						empty(name_city_temp);
+					}
+					strcpy(name_city_temp,temp);   // Save the name of the city of the row.
+					if(!strcmpi(name_city_temp, name_city)){
+						exits_city = 1;   // It is used to inform the user of an error in the city he has entered.
+					}
+					empty(temp);   // Once the temp value is saved, we need to initialize the variable so there is no bad data.
+					
+				}else if((j==2) && (!strcmpi(date, date_temp) && (!strcmpi(name_city, name_city_temp)))){
+					// We allocate a memory space only when the first city variable of type city_Attributes is saved.
+					if (l == 0){
+						// Memory is reserved for the vector where we are going to store the data
+						city = (city_Attributes*)malloc(sizeof(city_Attributes));
+						if(city == NULL){
+							printf("Memory could not be reserved. \n");
+							exit(1);
+						}
+					}
+					if(count == 0){
+						copy(temp, l, j); // This function copies in the memory assigned for the vectors of the cities(Madrid, Sevilla..), the temperature.
+					}
+					count = 1;   // Indicates that the date and city entered exist.
+					empty(temp);   // Once the temp value is saved, we need to initialize the variable so there is no bad data.
+					
+				}else if((count != 0) && (!strcmpi(name_city, name_city_temp)) && (j < 5)){
+					copy(date_temp, l, 0);   // Copy the data into the variable of 'city[l].date'.
+					copy(name_city_temp, l, 1);   // Copy the data into the variable of 'city[l].name'.
+					copy(temp, l, j);   // Copy the data into the appropiate variable of 'city_Attributes'.
+					empty(temp);   // Once the temp value is saved, we need to initialize the variable so there is no bad data.
+					// The vector 'city' is dimensioned each time a different day is saved.
+					city = (city_Attributes*)realloc(city,(l+2)*sizeof(city_Attributes));
+					
+				// his 'else if' is used to stop searching and save data when changing from the city searched to the next in the list
+				}else if((strcmpi(name_city, name_city_temp)) && (count != 0)){ 
+					// with this branch we improve efficiency by escaping from the function at the moment we change from our city to another not wanted.
+					fclose(f);
+					return l;
+				}	
+				empty(temp);
+			}
+			if(count == 1){
+				// Take on screen
+				printf("Date: %s   City: %s   Max_Temp= %f   Min_Temp= %f   Precipitation= %f\n", city[l].date, city[l].name,  city[l].max_Temp, city[l].min_Temp, city[l].precipitation);
+				l++;
+			}
+		}
+		// The file that has CSV format closes
+		fclose(f);
+		if((count == 0) && (exits_city == 0) && (exits_day == 1)){
+			printf("\n\nThe city entered is not in the record.You must enter a city that exits.\n");
+			fflush(stdin); // Remove the intro-letter from the buffer.
+			fgets(name_city,20,stdin);
+			change2(name_city);
+			
+		}else if((count == 0) && (exits_day == 0) && (exits_city == 1)){
+			printf("\n\nThe date entered is not in the record.\n");
+			printf("You must enter a date between the days: %s  -  %s.\n",first_day ,last_day);
+			fflush(stdin); // Remove the intro-letter from the buffer.
+			fgets(date,11,stdin);
+			change2(date);
+			
+		}else if((exits_city != 1) && (exits_day != 1)){
+			printf("\n\nThe city entered is not in the record.You must enter a city that exits.\n");
+			fflush(stdin); // Remove the intro-letter from the buffer.
+			fgets(name_city,20,stdin);
+			change2(name_city);
+			printf("\n\nThe date entered is not in the record.\n");
+			printf("You must enter a date between the days: %s  -  %s.\n",first_day ,last_day);
+			fflush(stdin); // Remove the intro-letter from the buffer.
+			fgets(date,11,stdin);
+			change2(date);
+			
+		}else if(count == 1){
+			return l;
+		}
+	}
+	free(city);   // We free the reserved memory to save resources.
+}
+
+
+
 // function that outputs the number of days and the number of rows of the file:
-void count_days(int num_of_cities, int *number_days, int *number_rows){ 
+int count_rows(){ 
 	
 	// we declare variables.
 	FILE *f;
 	char temp[200];
-
+	int number_rows;
 	// the file pointer is assigned.
 	f = fopen("Meteologica_vacante_ProgramadorC_20200901_datos.CSV","r");
 	if(f == NULL){
@@ -133,67 +248,19 @@ void count_days(int num_of_cities, int *number_days, int *number_rows){
 		exit(1);
 	}
 	
-	// count the number of days.
-	*number_rows = 0;
+	// count the number of rows.
+	number_rows = 0;
 	while(!feof(f)){
 		fgets(temp, 200, f);
-		*number_rows = *number_rows + 1;
+		number_rows++;
 	}
 	
 	// The file that has csv format closes:
 	fclose(f);
-	*number_rows = *number_rows - 1;   // because the loop counts the first row and the last line break
-	*number_days = *number_rows / num_of_cities;
+	number_rows = number_rows - 2;   // because the loop counts the first row and the last line break
+	return number_rows;
 }
 
-
-
-// Function that reserves memory for each day of vector Madrid:
-void reserv(int num_of_days, city_Attributes *Madrid){
-	city.Madrid = (city_Attributes*)malloc(num_of_days*sizeof(city_Attributes));
-	
-	if(city.Madrid == NULL){
-		printf("Memory could not be reserved. \n");
-		exit(1);
-	}
-}
-
-
-
-// Function that reserves memory for each day of vector Sevilla.
-void reserv2(int num_of_days, city_Attributes *Sevilla){
-	city.Sevilla = (city_Attributes*)malloc((num_of_days)*sizeof(city_Attributes));
-	//	printf("city_Attributes ocupa: %d.\n", (1)*sizeof(city_Attributes));
-	//printf("numero de dias: %i.\n", num_of_days);
-	if(city.Sevilla == NULL){
-		printf("Memory could not be reserved. \n");
-		exit(1);
-	}
-}
-
-
-
-// Function that reserves memory for each day of vector Gijon.
-void reserv3(int num_of_days, city_Attributes *Gijon){
-	city.Gijon = (city_Attributes*)malloc((num_of_days)*sizeof(city_Attributes));
-	//	printf("city_Attributes ocupa: %d.\n", (1)*sizeof(city_Attributes));
-	//printf("numero de dias: %i.\n", num_of_days);
-	if(city.Gijon == NULL){
-		printf("Memory could not be reserved. \n");
-		exit(1);
-	}
-}
-
-
-
-// Function that reserves memory for each day of vector Valencia.
-void reserv4(int num_of_days, city_Attributes *Valencia){
-	city.Valencia = (city_Attributes*)malloc((num_of_days)*sizeof(city_Attributes));
-	if(city.Valencia == NULL){
-		printf("Memory could not be reserved. \n");
-		exit(1);
-	}
-}
 
 
 
@@ -217,13 +284,48 @@ void change(char data[]){
 void change2(char data[]){
 	int i;
 	
-	// This loop changes ',' to a '.'
+	// This loop changes '\n' to a '\0'
 	for( i = 0; i < 11 ; i++){
 		if(data[i] == '\n'){
 			data[i] = '\0';
 		}
 	}
 }
+
+
+
+// This function removes the white space from the data beginning with this:
+void remove_space(char data[]){
+	int i;
+	int N = strlen(data);
+	
+	// Algorithm for date change:
+	while(data[0] == ' '){
+		for(i = 0; i < N; i++){
+				
+			data[i] = data[i+1];
+		}
+	}
+}
+
+
+
+
+void change_Gijon(char data[]){
+	int i;
+	int N = strlen(data);
+
+	// Algorithm for date change:
+	for(i = 0; i < N; i++){
+		empty(data);
+		data[0]='G';
+		data[1]='i';
+		data[2]='j';
+		data[3]='o';
+		data[4]='n';
+	}
+}
+
 
 
 
@@ -239,230 +341,71 @@ void empty(char temp[]){
 
 
 // This function copies in the memory assigned for the vectors of the cities(Madrid, Sevilla..), the data such as date, city, temperature ...
-void copy(char temp[], int i, int j){
+void copy(char temp[], int l, int k){
 	int N = strlen(temp) ;
-	
-	if((i/31)==0){
-		// With this switch we store the values in the variables with their corresponding type:
-		switch(j){
-				case 0 :{
-					city.Madrid[i%31].date = (char*)malloc(N*sizeof(char));
-					if(city.Madrid[i%31].date == NULL){
-						printf("Memory could not be reserved.\n");
-						exit(1);
-					}
-					// We correct the dates saved as: yyyy / mm / dd, and we save the data.
-					if(temp[4] == '/'){
-						strcpy( city.Madrid[i%31].date, flip_date(temp));
-					}else{
-						strcpy(	city.Madrid[i%31].date, temp);
-					}
-					
-					break;
-				}
-				
-				case 1 :{
-					city.Madrid[i%31].name = (char*)malloc(N*sizeof(char));
-					if(city.Madrid[i%31].name == NULL){
-						printf("Memory could not be reserved.\n");
-						exit(1);
-					}
-					strcpy(	city.Madrid[i%31].name, temp);
-					break;
-				}
-				
-				case 2 :{
-					change(temp);
-					city.Madrid[i%31].max_Temp = atof(temp);
-					break;
-				}
-				
-				case 3 :{
-					change(temp);
-					city.Madrid[i%31].min_Temp = atof(temp);
-					break;
-				}
-				
-				case 4 :{
-					change(temp);
-					city.Madrid[i%31].precipitation = atof(temp);
-					break;
-				}
-				
-				case 5 :{
-					change(temp);
-					city.Madrid[i%31].cloudiness = atoi(temp);
-					break;
-				}
-		}
-	}else if((i/31) == 1){
-		// With this switch we store the values in the variables with their corresponding type:
-		switch(j){
-				case 0 :{
-					city.Sevilla[i%31].date = (char*)malloc(N*sizeof(char));
-					if(city.Sevilla[i%31].date == NULL){
-						printf("Memory could not be reserved.\n");
-						exit(1);
-					}
-					// We correct the dates saved as: yyyy / mm / dd, and we save the data.
-					if(temp[4] == '/'){
-						strcpy( city.Sevilla[i%31].date, flip_date(temp));
-					}else{
-						strcpy(	city.Sevilla[i%31].date, temp);
-					}
-					break;
-				}
-				
-				case 1 :{
-					city.Sevilla[i%31].name = (char*)malloc(N*sizeof(char));
-					if(city.Sevilla[i%31].name == NULL){
-						printf("Memory could not be reserved.\n");
-						exit(1);
-					}
-					strcpy(	city.Sevilla[i%31].name, temp);
-					break;
-				}
-				
-				case 2 :{
-					change(temp);
-					city.Sevilla[i%31].max_Temp = atof(temp);
-					break;
-				}
-				
-				case 3 :{
-					change(temp);
-					city.Sevilla[i%31].min_Temp = atof(temp);
-					break;
-				}
-				
-				case 4 :{
-					change(temp);
-					city.Sevilla[i%31].precipitation = atof(temp);
-					break;
-				}
-				
-				case 5 :{
-					change(temp);
-					city.Sevilla[i%31].cloudiness = atoi(temp);
-					break;
-				}
-		}
-	}else if((i/31) == 2){
-		// With this switch we store the values in the variables with their corresponding type:
-		switch(j){
-				case 0 :{
-					city.Gijon[i%31].date = (char*)malloc(N*sizeof(char));
-					if(city.Gijon[i%31].date == NULL){
-						printf("Memory could not be reserved.\n");
-						exit(1);
-					}
-					// We correct the dates saved as: yyyy / mm / dd, and we save the data.
-					if(temp[4] == '/'){
-						strcpy( city.Gijon[i%31].date, flip_date(temp));
-					}else{
-						strcpy(	city.Gijon[i%31].date, temp);
-					}
-					break;
-				}
-				
-				case 1 :{
-					city.Gijon[i%31].name = (char*)malloc(N*sizeof(char));
-					if(city.Gijon[i%31].name == NULL){
-						printf("Memory could not be reserved.\n");
-						exit(1);
-					}
-					strcpy(	city.Gijon[i%31].name, "Gijon");
-					break;
-				}
-				
-				case 2 :{
-					change(temp);
-					city.Gijon[i%31].max_Temp = atof(temp);
-					break;
-				}
-				
-				case 3 :{
-					change(temp);
-					city.Gijon[i%31].min_Temp = atof(temp);
-					break;
-				}
-				
-				case 4 :{
-					change(temp);
-					city.Gijon[i%31].precipitation = atof(temp);
-					break;
-				}
-				
-				case 5 :{
-					change(temp);
-					city.Gijon[i%31].cloudiness = atoi(temp);
-					break;
-				}
-		}
-	}else if((i/31) == 3){
-		// With this switch we store the values in the variables with their corresponding type:
-		switch(j){
-				case 0 :{
-					city.Valencia[i%31].date = (char*)malloc(N*sizeof(char));
-					if(city.Valencia[i%31].date == NULL){
-						printf("Memory could not be reserved.\n");
-						exit(1);
-					}
-					// We correct the dates saved as: yyyy / mm / dd, and we save the data.
-					if(temp[4] == '/'){
-						strcpy( city.Valencia[i%31].date, flip_date(temp));
-					}else{
-						strcpy(	city.Valencia[i%31].date, temp);
-					}
-					break;
-				}
-				
-				case 1 :{
-					city.Valencia[i%31].name = (char*)malloc(N*sizeof(char));
-					if(city.Valencia[i%31].name == NULL){
-						printf("Memory could not be reserved.\n");
-						exit(1);
-					}
-					strcpy(	city.Valencia[i%31].name, temp);
-					break;
-				}
-				
-				case 2 :{
-					change(temp);
-					city.Valencia[i%31].max_Temp = atof(temp);
-					break;
-				}
-				
-				case 3 :{
-					change(temp);
-					city.Valencia[i%31].min_Temp = atof(temp);
-					break;
-				}
-				
-				case 4 :{
-					change(temp);
-					city.Valencia[i%31].precipitation = atof(temp);
-					break;
-				}
-				
-				case 5 :{
-					change(temp);
-					city.Valencia[i%31].cloudiness = atoi(temp);
-					break;
-				}
-		}
-	}
-}
 
+		// With this switch we store the values in the variables with their corresponding type:
+		switch(k){
+				case 0 :{
+					city[l].date = (char*)malloc(N*sizeof(char));   // Memory is reserved for the variable.
+					if(city[l].date == NULL){
+						printf("Memory could not be reserved.\n");
+						exit(1);
+					}
+					if(temp[4] == '/'){
+						strcpy( city[l].date, flip_date(temp));	 // We correct the dates saved as: yyyy / mm / dd, and we save the data.
+					}else{
+						strcpy(	city[l].date, temp);
+					}
+					break;
+				}
+				
+				case 1 :{
+					city[l].name = (char*)malloc(N*sizeof(char));
+					if(city[l].name == NULL){
+						printf("Memory could not be reserved.\n");
+						exit(1);
+						
+					}
+					strcpy( city[l].name, temp);   // Save the data.
+					break;
+				}
+				
+				case 2 :{
+					change(temp);
+					city[l].max_Temp = atof(temp);   // The string of numbers is changed by data type float and save the data.
+					break;
+				}
+				
+				case 3 :{
+					change(temp);
+					city[l].min_Temp = atof(temp);   
+					break;
+				}
+				
+				case 4 :{
+					change(temp);
+					city[l].precipitation = atof(temp);  
+					break;
+				}
+				
+				case 5 :{
+				//	city[l].cloudiness = atoi(temp);   // The string of numbers is changed by data type int and save the data.
+					break;
+				}
+		}
+}
+	
 
 
 // This function changes the order of the file dates that are saved as: yyyy / mm / dd:
 char* flip_date(char date[]){
 	int i;
-	char* aux=malloc(10);   // Memory is reserved for the variable.
+	int N = strlen(date);
+	char* aux=(char*)malloc(N*sizeof(char));   // Memory is reserved for the variable.
 	
 	// Algorithm for date change:
-	for(i = 0; i < 10; i++){
+	for(i = 0; i < N; i++){
 		if(i < 2){
 			aux[i] = date[i+8];
 		}else if((i > 1) && (i < 6)){
@@ -476,119 +419,29 @@ char* flip_date(char date[]){
 
 
 
-// This function searches for the requested day and saves the information for the following days:
-void srch_str_data(char name_of_city[], char date[], int number_of_days){
-	int i;
-	int aux = 0;   // 'aux' is an escape route
-	char answer[10];   // It is where the answer to 'exit' or enter a 'correct date' is saved.
-	char degrees[11];
-	
-	if(!(strcmpi(name_of_city, "Madrid"))){
-		// With this do-while loop we go through the stored dates and see if any match, otherwise it is suggested to introduce a true one or exit.
-		do{
-			i = 0;
-			while((i < number_of_days) && (aux == 0)){
-				if(!strcmpi(city.Madrid[i].date, date)){
-					aux = 1;
-				}
-				i++;
-			}
-			
-			if(aux == 0){
-				printf("The date entered is not in the record.\n");
-				printf("You must enter a date between the days: %s  -  %s. Or exit by typing 'exit'\n",city.Madrid[0].date ,city.Madrid[i-1].date);
-				fflush(stdin); // Remove the intro-letter from the buffer.
-				fgets(date,11,stdin);
-				change2(date);
-			}
-		}while(strcmpi(date, "exit") && (aux==0));
-		if(!strcmpi(date, "exit")){
-			exit(-1);
-		}
-		store_in_JSON(i, number_of_days,name_of_city);
-		
-	}else if(!strcmpi(name_of_city, "Sevilla")){
-		// With this do-while loop we go through the stored dates and see if any match, otherwise it is suggested to introduce a true one or exit.
-		do{
-			i = 0;
-			while((i < number_of_days) && (aux == 0)){
-				if(!strcmpi(city.Sevilla[i].date, date)){
-					aux = 1;
-				}
-				i++;
-			}
-			
-			if(aux == 0){
-				printf("The date entered is not in the record.\n");
-				printf("You must enter a date between the days: %s  -  %s. Or exit by typing 'exit'\n",city.Sevilla[0].date ,city.Sevilla[i-1].date);
-				fflush(stdin); // Remove the intro-letter from the buffer.
-				fgets(date,11,stdin);
-				change2(date);
-			}
-		}while(strcmpi(date, "exit") && (aux==0));
-		store_in_JSON(i, number_of_days,name_of_city);
-		
-	}else if(!strcmpi(name_of_city, "Gijon")){
-		// With this do-while loop we go through the stored dates and see if any match, otherwise it is suggested to introduce a true one or exit.
-		do{
-			i = 0;
-			while((i < number_of_days) && (aux == 0)){
-				if(!strcmpi(city.Gijon[i].date, date)){
-					aux = 1;
-				}
-				i++;
-			}
-			
-			if(aux == 0){
-				printf("The date entered is not in the record.\n");
-				printf("You must enter a date between the days: %s  -  %s. Or exit by typing 'exit'\n",city.Gijon[0].date ,city.Gijon[i-1].date);
-				fflush(stdin); // Remove the intro-letter from the buffer.
-				fgets(date,11,stdin);
-				change2(date);
-			}
-		}while(strcmpi(date, "exit") && (aux==0));
-		store_in_JSON(i, number_of_days,name_of_city);
-		
-	}else if(!strcmpi(name_of_city, "Valencia")){
-		// With this do-while loop we go through the stored dates and see if any match, otherwise it is suggested to introduce a true one or exit.
-		do{
-			i = 0;
-			while((i < number_of_days) && (aux == 0)){
-				if(!strcmpi(city.Valencia[i].date, date)){
-					aux = 1;
-				}
-				i++;
-			}
-			
-			if(aux == 0){
-				printf("The date entered is not in the record.\n");
-				printf("You must enter a date between the days: %s  -  %s. Or exit by typing 'exit'\n",city.Valencia[0].date ,city.Valencia[i-1].date);
-				fflush(stdin); // Remove the intro-letter from the buffer.
-				fgets(date,11,stdin);
-				change2(date);
-			}
-		}while(strcmpi(date, "exit") && (aux==0));
-		store_in_JSON(i, number_of_days,name_of_city);
-	}
+double Cel_to_Fahren(double *temperature){
+	*temperature = *temperature*1.8+32;
+	return *temperature;
 }
 
 
 
 // This function stores the required information in JSON format:
-void store_in_JSON(int position_of_day, int number_of_days ,char name_of_city[]){
-	
+void store_in_JSON( int num_days ,char name_of_city[]){
 	
 	FILE* JSON_file;
     char d_quotes = '"';
     char d_points = ':';
+    char degrees[50];
 	int temperature;
-	int i = position_of_day;
-	char degrees[11];
+	int i = 0;
 	
-	printf("enter in which units you want the temperature: Fahrenheit or Celsius.\n");
+	
+	name_of_city = strcat(name_of_city,".JSON");
+	
+	printf("\n\nEnter in which units you want the temperature: Fahrenheit or Celsius.\n");
 	fflush(stdin); // Remove the intro-letter from the buffer.
 	do{
-		
 		scanf("%s", &degrees);
 		if((strcmpi(degrees, "Celsius"))&&(strcmpi(degrees, "Fahrenheit"))){
 			printf("you must enter one of two options: Fahrenheit or Celsius.\n");
@@ -597,107 +450,36 @@ void store_in_JSON(int position_of_day, int number_of_days ,char name_of_city[])
 	
 		
 	
-	if(!(strcmpi(name_of_city, "Madrid"))){
-		JSON_file = fopen("Madrid.JSON", "w+t");
+		// The following lines of code write to the file in JSON format:
+		JSON_file = fopen(name_of_city, "w+t");
 		fputs("{\n", JSON_file);
-		fprintf(JSON_file,"  %c%s%c:[\n", d_quotes, city.Madrid[i].name, d_quotes);
-		for(i = position_of_day; i < number_of_days; i++){
+		fprintf(JSON_file,"  %c%s%c:[\n", d_quotes, city[i].name, d_quotes);
+		for(i = 1; i < num_days; i++){
 		    fputs("   {\n", JSON_file);
-			fprintf(JSON_file,"    %cDate%c: %c%s%c,\n", d_quotes, d_quotes, d_quotes, city.Madrid[i].date, d_quotes);
+			fprintf(JSON_file,"    %cDate%c: %c%s%c,\n", d_quotes, d_quotes, d_quotes, city[i].date, d_quotes);
+			
 		    if(!strcmpi(degrees,"Celsius")){
-		    	fprintf(JSON_file,"    %cmax_temp%c: %f,\n", d_quotes, d_quotes, city.Madrid[i].max_Temp);
-				fprintf(JSON_file,"    %cmin_temp%c: %f,\n", d_quotes, d_quotes, city.Madrid[i].min_Temp);
+		    	fprintf(JSON_file,"    %cmax_temp%c: %f,\n", d_quotes, d_quotes, city[i].max_Temp);
+				fprintf(JSON_file,"    %cmin_temp%c: %f,\n", d_quotes, d_quotes, city[i].min_Temp);
+				
 			}else{
-				fprintf(JSON_file,"    %cmax_temp%c: %f,\n", d_quotes, d_quotes, city.Madrid[i].max_Temp*1.8+32);
-				fprintf(JSON_file,"    %cmax_temp%c: %f,\n", d_quotes, d_quotes, city.Madrid[i].min_Temp*1.8+32);
+				fprintf(JSON_file,"    %cmax_temp%c: %f,\n", d_quotes, d_quotes, Cel_to_Fahren(&city[i].max_Temp));
+				fprintf(JSON_file,"    %cmax_temp%c: %f,\n", d_quotes, d_quotes, Cel_to_Fahren(&city[i].min_Temp));
 			}
-		    fprintf(JSON_file,"    %cprecipitation%c: %f,\n", d_quotes, d_quotes, city.Madrid[i].precipitation);
-		    fprintf(JSON_file,"    %ccloudiness%c: %i\n", d_quotes, d_quotes, city.Madrid[i].cloudiness);
-		    if(i<(number_of_days-1)){
+			
+		    fprintf(JSON_file,"    %cprecipitation%c: %f\n", d_quotes, d_quotes, city[i].precipitation);
+		    //fprintf(JSON_file,"    %ccloudiness%c: %i\n", d_quotes, d_quotes, city[i].cloudiness);
+		    
+		    if(i<(num_days-1)){
 		    	fputs("   },\n", JSON_file);
+		    	
 			}else{
 				fputs("   }\n", JSON_file);
 			}
+			
 		}
 		fputs("  ]\n", JSON_file);
 		fputs("}\n", JSON_file);
 	    fclose(JSON_file);
-
-	}else if(!(strcmpi(name_of_city, "Sevilla"))){
-		JSON_file = fopen("Sevilla.JSON", "w+t");
-		fputs("{\n", JSON_file);
-		fprintf(JSON_file,"  %c%s%c:[\n", d_quotes, city.Sevilla[i].name, d_quotes);
-		for(i = position_of_day; i < number_of_days; i++){
-		    fputs("   {\n", JSON_file);
-			fprintf(JSON_file,"    %cDate%c: %c%s%c,\n", d_quotes, d_quotes, d_quotes, city.Sevilla[i].date, d_quotes);
-		    if(!strcmpi(degrees,"Celsius")){
-		    	fprintf(JSON_file,"    %cmax_temp%c: %f,\n", d_quotes, d_quotes, city.Sevilla[i].max_Temp);
-				fprintf(JSON_file,"    %cmin_temp%c: %f,\n", d_quotes, d_quotes, city.Sevilla[i].min_Temp);
-			}else{
-				fprintf(JSON_file,"    %cmax_temp%c: %f,\n", d_quotes, d_quotes, city.Sevilla[i].max_Temp*1.8+32);
-				fprintf(JSON_file,"    %cmax_temp%c: %f,\n", d_quotes, d_quotes, city.Sevilla[i].min_Temp*1.8+32);
-			}
-		    fprintf(JSON_file,"    %cprecipitation%c: %f,\n", d_quotes, d_quotes, city.Sevilla[i].precipitation);
-		    fprintf(JSON_file,"    %ccloudiness%c: %i\n", d_quotes, d_quotes, city.Sevilla[i].cloudiness);
-		    if(i<(number_of_days-1)){
-		    	fputs("   },\n", JSON_file);
-			}else{
-				fputs("   }\n", JSON_file);
-			}
-		}
-		fputs("  ]\n", JSON_file);
-		fputs("}\n", JSON_file);
-	    fclose(JSON_file);
-	}else if(!(strcmpi(name_of_city, "Gijon"))){
-		JSON_file = fopen("Gijon.JSON", "w+t");
-		fputs("{\n", JSON_file);
-		fprintf(JSON_file,"  %c%s%c:[\n", d_quotes, city.Gijon[i].name, d_quotes);
-		for(i = position_of_day; i < number_of_days; i++){
-		    fputs("   {\n", JSON_file);
-			fprintf(JSON_file,"    %cDate%c: %c%s%c,\n", d_quotes, d_quotes, d_quotes, city.Gijon[i].date, d_quotes);
-		    if(!strcmpi(degrees,"Celsius")){
-		    	fprintf(JSON_file,"    %cmax_temp%c: %f,\n", d_quotes, d_quotes, city.Gijon[i].max_Temp);
-				fprintf(JSON_file,"    %cmin_temp%c: %f,\n", d_quotes, d_quotes, city.Gijon[i].min_Temp);
-			}else{
-				fprintf(JSON_file,"    %cmax_temp%c: %f,\n", d_quotes, d_quotes, city.Gijon[i].max_Temp*1.8+32);
-				fprintf(JSON_file,"    %cmax_temp%c: %f,\n", d_quotes, d_quotes, city.Gijon[i].min_Temp*1.8+32);
-			}
-		    fprintf(JSON_file,"    %cprecipitation%c: %f,\n", d_quotes, d_quotes, city.Gijon[i].precipitation);
-		    fprintf(JSON_file,"    %ccloudiness%c: %i\n", d_quotes, d_quotes, city.Gijon[i].cloudiness);
-		    if(i<(number_of_days-1)){
-		    	fputs("   },\n", JSON_file);
-			}else{
-				fputs("   }\n", JSON_file);
-			}
-		}
-		fputs("  ]\n", JSON_file);
-		fputs("}\n", JSON_file);
-	    fclose(JSON_file);
-	}else if(!(strcmpi(name_of_city, "Valencia"))){
-		JSON_file = fopen("Valencia.JSON", "w+t");
-		fputs("{\n", JSON_file);
-		fprintf(JSON_file,"  %c%s%c:[\n", d_quotes, city.Valencia[i].name, d_quotes);
-		for(i = position_of_day; i < number_of_days; i++){
-		    fputs("   {\n", JSON_file);
-			fprintf(JSON_file,"    %cDate%c: %c%s%c,\n", d_quotes, d_quotes, d_quotes, city.Valencia[i].date, d_quotes);
-		    if(!strcmpi(degrees,"Celsius")){
-		    	fprintf(JSON_file,"    %cmax_temp%c: %f,\n", d_quotes, d_quotes, city.Valencia[i].max_Temp);
-				fprintf(JSON_file,"    %cmin_temp%c: %f,\n", d_quotes, d_quotes, city.Valencia[i].min_Temp);
-			}else{
-				fprintf(JSON_file,"    %cmax_temp%c: %f,\n", d_quotes, d_quotes, city.Valencia[i].max_Temp*1.8+32);
-				fprintf(JSON_file,"    %cmax_temp%c: %f,\n", d_quotes, d_quotes, city.Valencia[i].min_Temp*1.8+32);
-			}
-		    fprintf(JSON_file,"    %cprecipitation%c: %f,\n", d_quotes, d_quotes, city.Valencia[i].precipitation);
-		    fprintf(JSON_file,"    %ccloudiness%c: %i\n", d_quotes, d_quotes, city.Valencia[i].cloudiness);
-		    if(i<(number_of_days-1)){
-		    	fputs("   },\n", JSON_file);
-			}else{
-				fputs("   }\n", JSON_file);
-			}
-		}
-		fputs("  ]\n", JSON_file);
-		fputs("}\n", JSON_file);
-	    fclose(JSON_file);
-	}
 }
 
